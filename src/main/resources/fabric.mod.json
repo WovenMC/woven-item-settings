@@ -10,17 +10,16 @@
   ],
   "contact": {
     "homepage": "https://wovenmc.net",
-    "issues": "https://github.com/WovenMC/woven-module-template/issues",
-    "sources": "https://github.com/WovenMC/woven-module-template"
+    "issues": "https://github.com/WovenMC/woven-item-settings/issues",
+    "sources": "https://github.com/WovenMC/woven-item-settings"
   },
   "icon": "assets/woven/icon.png",
   "environment": "*",
   "entrypoints": {
-    "main": [
-      "net.wovenmc.woven.impl.template.TemplateModInitializer"
-    ]
   },
-  "mixins": [],
+  "mixins": [
+    "woven-item-settings.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=0.9.0",
     "minecraft": ">=1.16.2"

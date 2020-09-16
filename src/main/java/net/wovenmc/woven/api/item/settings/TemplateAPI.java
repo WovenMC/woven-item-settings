@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.wovenmc.woven.api.template;
+package net.wovenmc.woven.api.item.settings;
 
 /**
  * Represents a dummy class as template for API.

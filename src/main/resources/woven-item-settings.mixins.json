@@ -1,0 +1,7 @@
+{
+  "required": true,
+  "package": "net.wovenmc.woven.mixin.item.settings",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+  ]
+}

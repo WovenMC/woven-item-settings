@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.wovenmc.woven.impl.template;
+package net.wovenmc.woven.impl.item.settings;
 
 import org.apache.logging.log4j.LogManager;
 
