@@ -31,7 +31,7 @@ public class MeterComponent {
 	private final boolean displayAtFull;
 
 	private MeterComponent(Function<ItemStack, Float> levelFunc, BiFunction<ItemStack, Float, Integer> colorFunc,
-						   boolean displayAtFull) {
+			boolean displayAtFull) {
 		this.levelFunc = levelFunc;
 		this.colorFunc = colorFunc;
 		this.displayAtFull = displayAtFull;
@@ -67,7 +67,7 @@ public class MeterComponent {
 	 */
 	public static class Builder {
 		private Function<ItemStack, Float> levelFunc = stack ->
-				(stack.getMaxDamage() - stack.getDamage()) / (float)stack.getMaxDamage();
+				(stack.getMaxDamage() - stack.getDamage()) / (float) stack.getMaxDamage();
 		private BiFunction<ItemStack, Float, Integer> colorFunc = (stack, level) ->
 				MathHelper.hsvToRgb(levelFunc.apply(stack) / 3F, 1F, 1F);
 		private boolean displayAtFull = false;

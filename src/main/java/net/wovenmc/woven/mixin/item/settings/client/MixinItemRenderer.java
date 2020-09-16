@@ -40,18 +40,19 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 @Mixin(ItemRenderer.class)
 public abstract class MixinItemRenderer {
-
 	@Shadow
 	protected abstract void renderGuiQuad(BufferBuilder buffer, int x, int y, int width, int height, int red, int green, int blue, int alpha);
 
 	@Inject(method = "renderGuiItemOverlay(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V",
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isDamaged()Z"), cancellable = true)
 	private void injectCustomMeter(TextRenderer textRenderer, ItemStack stack, int x, int y, String label,
-								   CallbackInfo info) {
+			CallbackInfo info) {
 		WovenItemSettingsHolder holder = (WovenItemSettingsHolder) stack.getItem();
+
 		if (holder.woven$getMeterComponent() != null) {
 			MeterComponent component = holder.woven$getMeterComponent();
 			float value = component.getLevel(stack);
+
 			if (value < 1 || (value == 1 && component.displayAtFull())) {
 				//draw the bar
 				RenderSystem.disableDepthTest();
@@ -72,6 +73,7 @@ public abstract class MixinItemRenderer {
 				//clean-up for skipped code in ItemRenderer
 				ClientPlayerEntity clientPlayerEntity = MinecraftClient.getInstance().player;
 				float cooldown = clientPlayerEntity == null ? 0.0F : clientPlayerEntity.getItemCooldownManager().getCooldownProgress(stack.getItem(), MinecraftClient.getInstance().getTickDelta());
+
 				if (cooldown > 0.0F) {
 					RenderSystem.disableDepthTest();
 					RenderSystem.disableTexture();
@@ -83,6 +85,7 @@ public abstract class MixinItemRenderer {
 					RenderSystem.enableTexture();
 					RenderSystem.enableDepthTest();
 				}
+
 				info.cancel();
 			}
 		}

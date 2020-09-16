@@ -37,16 +37,18 @@ public abstract class MixinBannerDuplicateRecipe {
 	@Inject(method = "getRemainingStacks", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getRecipeRemainder()Lnet/minecraft/item/Item;"),
 			locals = LocalCapture.CAPTURE_FAILEXCEPTION)
 	private void cacheSlot(CraftingInventory inv, CallbackInfoReturnable<DefaultedList<ItemStack>> info, DefaultedList<ItemStack> ret,
-						   int index) {
+			int index) {
 		slot.set(index);
 	}
 
 	@Redirect(method = "getRemainingStacks", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getRecipeRemainder()Lnet/minecraft/item/Item;"))
 	private Item getNewRemainder(Item origItem, Item origReturn, CraftingInventory inv) {
 		WovenItemSettingsHolder holder = (WovenItemSettingsHolder) origItem;
+
 		if (holder.woven$getDynamicRecipeRemainder() != null) {
 			return holder.woven$getDynamicRecipeRemainder().apply(inv.getStack(slot.get()));
 		}
+
 		return origReturn;
 	}
 }

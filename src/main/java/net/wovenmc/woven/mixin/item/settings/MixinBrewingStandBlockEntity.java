@@ -33,7 +33,7 @@ public abstract class MixinBrewingStandBlockEntity {
 	private final ThreadLocal<ItemStack> stack = new ThreadLocal<>();
 
 	@Inject(method = "craft", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getRecipeRemainder()Lnet/minecraft/item/Item;"),
-		locals = LocalCapture.CAPTURE_FAILEXCEPTION)
+			locals = LocalCapture.CAPTURE_FAILEXCEPTION)
 	private void cacheStack(CallbackInfo info, ItemStack stack) {
 		this.stack.set(stack);
 	}
@@ -41,9 +41,11 @@ public abstract class MixinBrewingStandBlockEntity {
 	@Redirect(method = "craft", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getRecipeRemainder()Lnet/minecraft/item/Item;"))
 	private Item getNewRemainder(Item origItem, Item origReturn) {
 		WovenItemSettingsHolder holder = (WovenItemSettingsHolder) origItem;
+
 		if (holder.woven$getDynamicRecipeRemainder() != null) {
 			return holder.woven$getDynamicRecipeRemainder().apply(stack.get());
 		}
+
 		return origReturn;
 	}
 }

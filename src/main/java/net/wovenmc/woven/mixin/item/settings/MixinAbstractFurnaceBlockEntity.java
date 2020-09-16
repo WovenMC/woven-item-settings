@@ -41,9 +41,11 @@ public abstract class MixinAbstractFurnaceBlockEntity {
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getRecipeRemainder()Lnet/minecraft/item/Item;"))
 	private Item getNewRemainder(Item origItem, Item origReturn) {
 		WovenItemSettingsHolder holder = (WovenItemSettingsHolder) origItem;
+
 		if (holder.woven$getDynamicRecipeRemainder() != null) {
 			return holder.woven$getDynamicRecipeRemainder().apply(stack.get());
 		}
+
 		return origReturn;
 	}
 }
