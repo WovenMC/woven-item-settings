@@ -16,7 +16,7 @@
 
 package net.wovenmc.woven.mixin.item.settings;
 
-import net.wovenmc.woven.api.item.settings.WovenSettingsHolder;
+import net.wovenmc.woven.impl.item.settings.WovenItemSettingsHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -43,9 +43,9 @@ public abstract class MixinBannerDuplicateRecipe {
 
 	@Redirect(method = "getRemainingStacks", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getRecipeRemainder()Lnet/minecraft/item/Item;"))
 	private Item getNewRemainder(Item origItem, Item origReturn, CraftingInventory inv) {
-		WovenSettingsHolder holder = (WovenSettingsHolder) origItem;
-		if (holder.getDynamicRecipeRemainder() != null) {
-			return holder.getDynamicRecipeRemainder().apply(inv.getStack(slot.get()));
+		WovenItemSettingsHolder holder = (WovenItemSettingsHolder) origItem;
+		if (holder.woven$getDynamicRecipeRemainder() != null) {
+			return holder.woven$getDynamicRecipeRemainder().apply(inv.getStack(slot.get()));
 		}
 		return origReturn;
 	}

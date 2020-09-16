@@ -20,23 +20,45 @@ import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Rarity;
 
+/**
+ * An extension to {@link Item.Settings} providing additional hooks for items.
+ */
 public class WovenItemSettings extends Item.Settings {
-	private MeterComponent meterComponent;
-	private Function<ItemStack, Item> dynamicRecipeRemainder;
+	private MeterComponent meterComponent = null;
+	private Function<ItemStack, Item> dynamicRecipeRemainder = null;
+	private Function<ItemStack, EquipmentSlot> equipmentHandler = null;
 
+	/**
+	 * @param meterComponent The {@link MeterComponent} for this item.
+	 * @return The item settings with the component added.
+	 */
 	public WovenItemSettings meter(MeterComponent meterComponent) {
 		this.meterComponent = meterComponent;
 		return this;
 	}
 
+	/**
+	 * @param remainder A function for determining the remainder of an item stack when crafting dynamically.
+	 * @return The item settings with the function added.
+	 */
 	public WovenItemSettings dynamicRecipeRemainder(Function<ItemStack, Item> remainder) {
 		this.dynamicRecipeRemainder = remainder;
+		return this;
+	}
+
+	/**
+	 * @param equipmentHandler A function for determining the equipment slot an item stack should go in.
+	 * @return The item settings with the function added.
+	 */
+	public WovenItemSettings equipmentHandler(Function<ItemStack, EquipmentSlot> equipmentHandler) {
+		this.equipmentHandler = equipmentHandler;
 		return this;
 	}
 
@@ -88,13 +110,30 @@ public class WovenItemSettings extends Item.Settings {
 		return this;
 	}
 
+	/**
+	 * For internal use.
+	 * @return The set meter component, or null if none was set.
+	 */
 	@Nullable
 	public MeterComponent getMeterComponent() {
 		return meterComponent;
 	}
 
+	/**
+	 * For internal use.
+	 * @return The set dynamic recipe remainder, or null if none was set.
+	 */
 	@Nullable
 	public Function<ItemStack, Item> getDynamicRecipeRemainder() {
 		return dynamicRecipeRemainder;
+	}
+
+	/**
+	 * For internal use.
+	 * @return The set equipment handler, or null if none was set
+	 */
+	@Nullable
+	public Function<ItemStack, EquipmentSlot> getEquipmentHandler() {
+		return equipmentHandler;
 	}
 }

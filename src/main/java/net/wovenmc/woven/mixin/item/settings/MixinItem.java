@@ -18,38 +18,54 @@ package net.wovenmc.woven.mixin.item.settings;
 
 import java.util.function.Function;
 
-import net.wovenmc.woven.api.item.settings.WovenSettingsHolder;
+import net.wovenmc.woven.impl.item.settings.WovenItemSettingsHolder;
 import net.wovenmc.woven.api.item.settings.MeterComponent;
 import net.wovenmc.woven.api.item.settings.WovenItemSettings;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 @Mixin(Item.class)
-public abstract class MixinItem implements WovenSettingsHolder {
-	private MeterComponent meterComponent;
-	private Function<ItemStack, Item> dynamicRecipeRemainder;
+public abstract class MixinItem implements WovenItemSettingsHolder {
+	@Unique
+	private MeterComponent woven$meterComponent;
+	@Unique
+	private Function<ItemStack, Item> woven$dynamicRecipeRemainder;
+	@Unique
+	private Function<ItemStack, EquipmentSlot> woven$equipmentHandler;
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void captureInit(Item.Settings settings, CallbackInfo info) {
 		if (settings instanceof WovenItemSettings) {
 			WovenItemSettings woven = (WovenItemSettings) settings;
-			this.meterComponent = woven.getMeterComponent();
-			this.dynamicRecipeRemainder = woven.getDynamicRecipeRemainder();
+			this.woven$meterComponent = woven.getMeterComponent();
+			this.woven$dynamicRecipeRemainder = woven.getDynamicRecipeRemainder();
+			this.woven$equipmentHandler = woven.getEquipmentHandler();
 		}
 	}
 
+	@Nullable
 	@Override
-	public MeterComponent getMeterComponent() {
-		return meterComponent;
+	public MeterComponent woven$getMeterComponent() {
+		return woven$meterComponent;
 	}
 
+	@Nullable
 	@Override
-	public Function<ItemStack, Item> getDynamicRecipeRemainder() {
-		return dynamicRecipeRemainder;
+	public Function<ItemStack, Item> woven$getDynamicRecipeRemainder() {
+		return woven$dynamicRecipeRemainder;
+	}
+
+	@Nullable
+	@Override
+	public Function<ItemStack, EquipmentSlot> woven$getEquipmentHandler() {
+		return woven$equipmentHandler;
 	}
 }

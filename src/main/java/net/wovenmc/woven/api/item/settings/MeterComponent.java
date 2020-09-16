@@ -22,6 +22,9 @@ import java.util.function.Function;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 
+/**
+ * A component that displays a colored meter on an item in a GUI, similar to the vanilla damage bar.
+ */
 public class MeterComponent {
 	private final Function<ItemStack, Float> levelFunc;
 	private final BiFunction<ItemStack, Float, Integer> colorFunc;
@@ -34,18 +37,34 @@ public class MeterComponent {
 		this.displayAtFull = displayAtFull;
 	}
 
+	/**
+	 * Get the current level of the meter.
+	 * @param stack The item stack to get the level for.
+	 * @return The current level, as a float between 0 and 1 inclusive.
+	 */
 	public float getLevel(ItemStack stack) {
 		return levelFunc.apply(stack);
 	}
 
+	/**
+	 * Get the current color of the meter.
+	 * @param stack The item stack to get the color for.
+	 * @return The current color as an RGB value.
+	 */
 	public int getColor(ItemStack stack) {
 		return colorFunc.apply(stack, levelFunc.apply(stack));
 	}
 
+	/**
+	 * @return true if the meter should be rendered when the value is 1.
+	 */
 	public boolean displayAtFull() {
 		return displayAtFull;
 	}
 
+	/**
+	 * A builder for meter components.
+	 */
 	public static class Builder {
 		private Function<ItemStack, Float> levelFunc = stack ->
 				(stack.getMaxDamage() - stack.getDamage()) / (float)stack.getMaxDamage();
@@ -53,21 +72,35 @@ public class MeterComponent {
 				MathHelper.hsvToRgb(levelFunc.apply(stack) / 3F, 1F, 1F);
 		private boolean displayAtFull = false;
 
+		/**
+		 * @param function The function for getting the current level of a meter.
+		 * @return The builder with the function set.
+		 */
 		public Builder levelFunction(Function<ItemStack, Float> function) {
 			this.levelFunc = function;
 			return this;
 		}
 
+		/**
+		 * @param function The function for getting the current color of a meter.
+		 * @return The builder with the function set.
+		 */
 		public Builder colorFunction(BiFunction<ItemStack, Float, Integer> function) {
 			this.colorFunc = function;
 			return this;
 		}
 
+		/**
+		 * @return The builder with the flag for displaying at full set.
+		 */
 		public Builder displayAtFull() {
 			this.displayAtFull = true;
 			return this;
 		}
 
+		/**
+		 * @return A built meter component.
+		 */
 		public MeterComponent build() {
 			return new MeterComponent(levelFunc, colorFunc, displayAtFull);
 		}

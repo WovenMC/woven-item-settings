@@ -18,7 +18,7 @@ package net.wovenmc.woven.mixin.item.settings.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.wovenmc.woven.api.item.settings.MeterComponent;
-import net.wovenmc.woven.api.item.settings.WovenSettingsHolder;
+import net.wovenmc.woven.impl.item.settings.WovenItemSettingsHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -48,9 +48,9 @@ public abstract class MixinItemRenderer {
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isDamaged()Z"), cancellable = true)
 	private void injectCustomMeter(TextRenderer textRenderer, ItemStack stack, int x, int y, String label,
 								   CallbackInfo info) {
-		WovenSettingsHolder holder = (WovenSettingsHolder) stack.getItem();
-		if (holder.getMeterComponent() != null) {
-			MeterComponent component = holder.getMeterComponent();
+		WovenItemSettingsHolder holder = (WovenItemSettingsHolder) stack.getItem();
+		if (holder.woven$getMeterComponent() != null) {
+			MeterComponent component = holder.woven$getMeterComponent();
 			float value = component.getLevel(stack);
 			if (value < 1 || (value == 1 && component.displayAtFull())) {
 				//draw the bar

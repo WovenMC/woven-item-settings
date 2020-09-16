@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-package net.wovenmc.woven.api.item.settings;
+package net.wovenmc.woven.impl.item.settings;
 
 import java.util.function.Function;
 
+import net.wovenmc.woven.api.item.settings.MeterComponent;
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
-public interface WovenSettingsHolder {
+public interface WovenItemSettingsHolder {
 	@Nullable
-	MeterComponent getMeterComponent();
+	MeterComponent woven$getMeterComponent();
 
 	@Nullable
-	Function<ItemStack, Item> getDynamicRecipeRemainder();
+	Function<ItemStack, Item> woven$getDynamicRecipeRemainder();
+
+	@Nullable
+	Function<ItemStack, EquipmentSlot> woven$getEquipmentHandler();
 }
