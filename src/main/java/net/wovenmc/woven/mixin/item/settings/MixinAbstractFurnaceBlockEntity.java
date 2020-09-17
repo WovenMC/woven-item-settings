@@ -33,7 +33,6 @@ import net.minecraft.item.Items;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.registry.Registry;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
 public abstract class MixinAbstractFurnaceBlockEntity {
@@ -51,10 +50,11 @@ public abstract class MixinAbstractFurnaceBlockEntity {
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getRecipeRemainder()Lnet/minecraft/item/Item;"))
 	private Item hackCustomFuelRemainder(Item origItem) {
 		WovenItemSettingsHolder holder = (WovenItemSettingsHolder) origItem;
-		System.out.println(Registry.ITEM.getId(origItem));
 
 		if (holder.woven$getDynamicRecipeRemainder() != null) {
-			return Items.COAL;
+			//hack to make the furnace realize it should do dynamic recipe remainder due to mixin not being able to change flow
+			//just needs to not be null
+			return Items.AIR;
 		}
 
 		return origItem.getRecipeRemainder();
@@ -65,7 +65,7 @@ public abstract class MixinAbstractFurnaceBlockEntity {
 		WovenItemSettingsHolder holder = (WovenItemSettingsHolder) origItem;
 
 		if (holder.woven$getDynamicRecipeRemainder() != null) {
-			return holder.woven$getDynamicRecipeRemainder().apply(stack.get(), FUEL_ID);
+			return holder.woven$getDynamicRecipeRemainder().getRemainder(stack.get(), FUEL_ID);
 		}
 
 		return new ItemStack(origItem);
@@ -77,7 +77,7 @@ public abstract class MixinAbstractFurnaceBlockEntity {
 		WovenItemSettingsHolder woven = (WovenItemSettingsHolder) inStack.getItem();
 
 		if (woven.woven$getDynamicRecipeRemainder() != null) {
-			ItemStack newStack = woven.woven$getDynamicRecipeRemainder().apply(inStack, recipe.getId());
+			ItemStack newStack = woven.woven$getDynamicRecipeRemainder().getRemainder(inStack, recipe.getId());
 
 			if (!newStack.isEmpty()) {
 				this.inventory.set(0, newStack);

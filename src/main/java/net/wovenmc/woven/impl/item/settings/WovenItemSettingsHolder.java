@@ -16,23 +16,18 @@
 
 package net.wovenmc.woven.impl.item.settings;
 
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
+import net.wovenmc.woven.api.item.settings.EquipmentHandler;
 import net.wovenmc.woven.api.item.settings.MeterComponent;
+import net.wovenmc.woven.api.item.settings.RecipeRemainderHandler;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
 
 public interface WovenItemSettingsHolder {
 	@Nullable
 	MeterComponent woven$getMeterComponent();
 
 	@Nullable
-	BiFunction<ItemStack, Identifier, ItemStack> woven$getDynamicRecipeRemainder();
+	RecipeRemainderHandler woven$getDynamicRecipeRemainder();
 
 	@Nullable
-	Function<ItemStack, EquipmentSlot> woven$getEquipmentHandler();
+	EquipmentHandler woven$getEquipmentHandler();
 }

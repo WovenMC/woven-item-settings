@@ -16,17 +16,12 @@
 
 package net.wovenmc.woven.api.item.settings;
 
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
+import net.wovenmc.woven.mixin.item.settings.MixinItem;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 
 /**
@@ -34,8 +29,9 @@ import net.minecraft.util.Rarity;
  */
 public class WovenItemSettings extends Item.Settings {
 	private MeterComponent meterComponent = null;
-	private BiFunction<ItemStack, Identifier, ItemStack> dynamicRecipeRemainder = null;
-	private Function<ItemStack, EquipmentSlot> equipmentHandler = null;
+	private RecipeRemainderHandler dynamicRecipeRemainder = null;
+	private EquipmentHandler equipmentHandler = null;
+	private boolean selfRemainder = false;
 
 	/**
 	 * @param meterComponent The {@link MeterComponent} for this item.
@@ -47,19 +43,42 @@ public class WovenItemSettings extends Item.Settings {
 	}
 
 	/**
-	 * @param remainder A function for determining the remainder of an item stack when crafting dynamically.
-	 * @return The item settings with the function added.
+	 * Incompatible with {@link WovenItemSettings#selfRemainder} and {@link WovenItemSettings#recipeRemainder(Item)}.
+	 * @param remainder A handler for determining the remainder of an item stack when crafting dynamically.
+	 * @return The item settings with the handler added.
 	 */
-	public WovenItemSettings dynamicRecipeRemainder(BiFunction<ItemStack, Identifier, ItemStack> remainder) {
-		this.dynamicRecipeRemainder = remainder;
-		return this;
+	public WovenItemSettings recipeRemainder(RecipeRemainderHandler remainder) {
+		if (selfRemainder) {
+			throw new RuntimeException("Unable to have dynamic recipe remainder AND self recipe remainder.");
+		} else if (((MixinItem.ItemSettingsAccessor) this).getRecipeRemainder() != null) {
+			throw new RuntimeException("Unable to have dynamic recipe remainder AND static recipe remainder.");
+		} else {
+			this.dynamicRecipeRemainder = remainder;
+			return this;
+		}
 	}
 
 	/**
-	 * @param equipmentHandler A function for determining the equipment slot an item stack should go in.
-	 * @return The item settings with the function added.
+	 * Incompatible with {@link WovenItemSettings#recipeRemainder(RecipeRemainderHandler)} and {@link Item.Settings#recipeRemainder(Item)}.
+	 * Flags an item to return itself as a recipe remainder without a dynamic remainder handler.
+	 * @return The item settings with the flag set.
 	 */
-	public WovenItemSettings equipmentHandler(Function<ItemStack, EquipmentSlot> equipmentHandler) {
+	public WovenItemSettings selfRemainder() {
+		if (dynamicRecipeRemainder != null) {
+			throw new RuntimeException("Unable to have self recipe remainder AND dynamic recipe remainder.");
+		} else if (((MixinItem.ItemSettingsAccessor) this).getRecipeRemainder() != null) {
+			throw new RuntimeException("Unable to have self recipe remainder AND static recipe remainder.");
+		} else {
+			this.selfRemainder = true;
+			return this;
+		}
+	}
+
+	/**
+	 * @param equipmentHandler A handler for determining the equipment slot an item stack should go in.
+	 * @return The item settings with the handler added.
+	 */
+	public WovenItemSettings equipmentHandler(EquipmentHandler equipmentHandler) {
 		this.equipmentHandler = equipmentHandler;
 		return this;
 	}
@@ -76,10 +95,19 @@ public class WovenItemSettings extends Item.Settings {
 		return this;
 	}
 
+	/**
+	 * Incompatible with {@link WovenItemSettings#recipeRemainder(RecipeRemainderHandler)} and {@link WovenItemSettings#selfRemainder}.
+	 */
 	@Override
 	public WovenItemSettings recipeRemainder(Item recipeRemainder) {
-		super.recipeRemainder(recipeRemainder);
-		return this;
+		if (dynamicRecipeRemainder != null) {
+			throw new RuntimeException("Unable to have static recipe remainder AND dynamic recipe remainder.");
+		} else if (selfRemainder) {
+			throw new RuntimeException("Unable to have static recipe remainder AND self recipe remainder.");
+		} else {
+			super.recipeRemainder(recipeRemainder);
+			return this;
+		}
 	}
 
 	@Override
@@ -126,8 +154,16 @@ public class WovenItemSettings extends Item.Settings {
 	 * @return The set dynamic recipe remainder, or null if none was set.
 	 */
 	@Nullable
-	public BiFunction<ItemStack, Identifier, ItemStack> getDynamicRecipeRemainder() {
+	public RecipeRemainderHandler getRecipeRemainder() {
 		return dynamicRecipeRemainder;
+	}
+
+	/**
+	 * For internal use.
+	 * @return Whether the self-remainder flag was set.
+	 */
+	public boolean remainsSelf() {
+		return selfRemainder;
 	}
 
 	/**
@@ -135,7 +171,7 @@ public class WovenItemSettings extends Item.Settings {
 	 * @return The set equipment handler, or null if none was set
 	 */
 	@Nullable
-	public Function<ItemStack, EquipmentSlot> getEquipmentHandler() {
+	public EquipmentHandler getEquipmentHandler() {
 		return equipmentHandler;
 	}
 }

@@ -16,39 +16,40 @@
 
 package net.wovenmc.woven.mixin.item.settings;
 
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
+import net.wovenmc.woven.api.item.settings.EquipmentHandler;
+import net.wovenmc.woven.api.item.settings.RecipeRemainderHandler;
 import net.wovenmc.woven.impl.item.settings.WovenItemSettingsHolder;
 import net.wovenmc.woven.api.item.settings.MeterComponent;
 import net.wovenmc.woven.api.item.settings.WovenItemSettings;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
 
 @Mixin(Item.class)
 public abstract class MixinItem implements WovenItemSettingsHolder {
 	@Unique
 	private MeterComponent woven$meterComponent;
 	@Unique
-	private BiFunction<ItemStack, Identifier, ItemStack> woven$dynamicRecipeRemainder;
+	private RecipeRemainderHandler woven$dynamicRecipeRemainder;
 	@Unique
-	private Function<ItemStack, EquipmentSlot> woven$equipmentHandler;
+	private boolean woven$selfRemainder;
+	@Unique
+	private EquipmentHandler woven$equipmentHandler;
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void captureInit(Item.Settings settings, CallbackInfo info) {
 		if (settings instanceof WovenItemSettings) {
 			WovenItemSettings woven = (WovenItemSettings) settings;
 			this.woven$meterComponent = woven.getMeterComponent();
-			this.woven$dynamicRecipeRemainder = woven.getDynamicRecipeRemainder();
+			this.woven$dynamicRecipeRemainder = woven.getRecipeRemainder();
+			this.woven$selfRemainder = woven.remainsSelf();
 			this.woven$equipmentHandler = woven.getEquipmentHandler();
 		}
 	}
@@ -61,13 +62,24 @@ public abstract class MixinItem implements WovenItemSettingsHolder {
 
 	@Nullable
 	@Override
-	public BiFunction<ItemStack, Identifier, ItemStack> woven$getDynamicRecipeRemainder() {
+	public RecipeRemainderHandler woven$getDynamicRecipeRemainder() {
 		return woven$dynamicRecipeRemainder;
 	}
 
 	@Nullable
 	@Override
-	public Function<ItemStack, EquipmentSlot> woven$getEquipmentHandler() {
+	public EquipmentHandler woven$getEquipmentHandler() {
 		return woven$equipmentHandler;
+	}
+
+	@Inject(method = "getRecipeRemainder", at = @At("HEAD"))
+	private void injectSelfRemainder(CallbackInfoReturnable<Item> info) {
+		if (woven$selfRemainder) info.setReturnValue((Item) (Object) this);
+	}
+
+	@Mixin(Item.Settings.class)
+	public interface ItemSettingsAccessor {
+		@Accessor
+		Item getRecipeRemainder();
 	}
 }

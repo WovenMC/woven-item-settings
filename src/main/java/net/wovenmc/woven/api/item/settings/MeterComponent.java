@@ -16,9 +16,6 @@
 
 package net.wovenmc.woven.api.item.settings;
 
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 
@@ -26,14 +23,14 @@ import net.minecraft.util.math.MathHelper;
  * A component that displays a colored meter on an item in a GUI, similar to the vanilla damage bar.
  */
 public class MeterComponent {
-	private final Function<ItemStack, Float> levelFunc;
-	private final BiFunction<ItemStack, Float, Integer> colorFunc;
+	private final LevelHandler levelHandler;
+	private final ColorHandler colorHandler;
 	private final boolean displayAtFull;
 
-	private MeterComponent(Function<ItemStack, Float> levelFunc, BiFunction<ItemStack, Float, Integer> colorFunc,
+	private MeterComponent(LevelHandler levelHandler, ColorHandler colorHandler,
 			boolean displayAtFull) {
-		this.levelFunc = levelFunc;
-		this.colorFunc = colorFunc;
+		this.levelHandler = levelHandler;
+		this.colorHandler = colorHandler;
 		this.displayAtFull = displayAtFull;
 	}
 
@@ -43,7 +40,7 @@ public class MeterComponent {
 	 * @return The current level, as a float between 0 and 1 inclusive.
 	 */
 	public float getLevel(ItemStack stack) {
-		return levelFunc.apply(stack);
+		return levelHandler.getLevel(stack);
 	}
 
 	/**
@@ -52,7 +49,7 @@ public class MeterComponent {
 	 * @return The current color as an RGB value.
 	 */
 	public int getColor(ItemStack stack) {
-		return colorFunc.apply(stack, levelFunc.apply(stack));
+		return colorHandler.getColor(stack, levelHandler.getLevel(stack));
 	}
 
 	/**
@@ -66,27 +63,27 @@ public class MeterComponent {
 	 * A builder for meter components.
 	 */
 	public static class Builder {
-		private Function<ItemStack, Float> levelFunc = stack ->
+		private LevelHandler levelHandler = stack ->
 				(stack.getMaxDamage() - stack.getDamage()) / (float) stack.getMaxDamage();
-		private BiFunction<ItemStack, Float, Integer> colorFunc = (stack, level) ->
-				MathHelper.hsvToRgb(levelFunc.apply(stack) / 3F, 1F, 1F);
+		private ColorHandler colorHandler = (stack, level) ->
+				MathHelper.hsvToRgb(levelHandler.getLevel(stack) / 3F, 1F, 1F);
 		private boolean displayAtFull = false;
 
 		/**
-		 * @param function The function for getting the current level of a meter.
-		 * @return The builder with the function set.
+		 * @param handler The handler for getting the current level of a meter.
+		 * @return The builder with the handler set.
 		 */
-		public Builder levelFunction(Function<ItemStack, Float> function) {
-			this.levelFunc = function;
+		public Builder levelFunction(LevelHandler handler) {
+			this.levelHandler = handler;
 			return this;
 		}
 
 		/**
-		 * @param function The function for getting the current color of a meter.
-		 * @return The builder with the function set.
+		 * @param handler The handler for getting the current color of a meter.
+		 * @return The builder with the handler set.
 		 */
-		public Builder colorFunction(BiFunction<ItemStack, Float, Integer> function) {
-			this.colorFunc = function;
+		public Builder colorHandler(ColorHandler handler) {
+			this.colorHandler = handler;
 			return this;
 		}
 
@@ -102,7 +99,32 @@ public class MeterComponent {
 		 * @return A built meter component.
 		 */
 		public MeterComponent build() {
-			return new MeterComponent(levelFunc, colorFunc, displayAtFull);
+			return new MeterComponent(levelHandler, colorHandler, displayAtFull);
 		}
+	}
+
+	/**
+	 * An interface for determining the level of a meter.
+	 */
+	@FunctionalInterface
+	public interface LevelHandler {
+		/**
+		 * @param stack The stack to get the meter level for.
+		 * @return The level of the meter, as a float from 0 to 1 inclusive.
+		 */
+		float getLevel(ItemStack stack);
+	}
+
+	/**
+	 * An interface for determining the color of a meter.
+	 */
+	@FunctionalInterface
+	public interface ColorHandler {
+		/**
+		 * @param stack The stack to get the meter color for.
+		 * @param value The current level of the meter.
+		 * @return The color to use as an RGB value.
+		 */
+		int getColor(ItemStack stack, float value);
 	}
 }
