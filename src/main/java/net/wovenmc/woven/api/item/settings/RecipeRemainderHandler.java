@@ -10,7 +10,7 @@ import net.minecraft.util.Identifier;
 public interface RecipeRemainderHandler {
 	/**
 	 * @param original The original item stack used in the recipe.
-	 * @param recipeId The ID of the original recipe. Hardcoded to minecraft:brewing for brewing and minecraft:furnace_fuel for furnace fuel.
+	 * @param recipeId The identifier of the original recipe. Hardcoded to {@code minecraft:brewing} for brewing and {@code minecraft:furnace_fuel} for furnace fuel.
 	 * @return The item stack that should remain after crafting.
 	 */
 	ItemStack getRemainder(ItemStack original, Identifier recipeId);
