@@ -66,7 +66,7 @@ public class MeterComponent {
 		private LevelHandler levelHandler = stack ->
 				(stack.getMaxDamage() - stack.getDamage()) / (float) stack.getMaxDamage();
 		private ColorHandler colorHandler = (stack, level) ->
-				MathHelper.hsvToRgb(levelHandler.getLevel(stack) / 3F, 1F, 1F);
+				MathHelper.hsvToRgb(level / 3F, 1F, 1F);
 		private boolean displayAtFull = false;
 
 		/**
