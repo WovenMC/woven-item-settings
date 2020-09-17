@@ -18,37 +18,60 @@ package net.wovenmc.woven.mixin.item.settings;
 
 import net.wovenmc.woven.impl.item.settings.WovenItemSettingsHolder;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 
 @Mixin(Recipe.class)
-public abstract class MixinRecipe<C extends Inventory> {
-	private final ThreadLocal<Integer> slot = new ThreadLocal<>();
+public interface MixinRecipe<C extends Inventory> {
+	@Shadow
+	Identifier getId();
 
-	@Inject(method = "getRemainingStacks", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getRecipeRemainder()Lnet/minecraft/item/Item;"),
-			locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-	private void cacheSlot(C inv, CallbackInfoReturnable<DefaultedList<ItemStack>> info, DefaultedList<ItemStack> ret,
-			int index) {
-		slot.set(index);
-	}
+	/**
+	 * @author repulica
+	 * @reason injections into interfaces dont work rn
+	 * TODO: remove once default interface method injection works
+	 */
+	@Overwrite
+	default DefaultedList<ItemStack> getRemainingStacks(C inventory) {
+		DefaultedList<ItemStack> defaultedList = DefaultedList.ofSize(inventory.size(), ItemStack.EMPTY);
 
-	@Redirect(method = "getRemainingStacks", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getRecipeRemainder()Lnet/minecraft/item/Item;"))
-	private Item getNewRemainder(Item origItem, Item origReturn, C inv) {
-		WovenItemSettingsHolder holder = (WovenItemSettingsHolder) origItem;
-
-		if (holder.woven$getDynamicRecipeRemainder() != null) {
-			return holder.woven$getDynamicRecipeRemainder().apply(inv.getStack(slot.get()));
+		for(int i = 0; i < defaultedList.size(); ++i) {
+			Item item = inventory.getStack(i).getItem();
+			WovenItemSettingsHolder woven = (WovenItemSettingsHolder) item;
+			if (woven.woven$getDynamicRecipeRemainder() != null) {
+				defaultedList.set(i, woven.woven$getDynamicRecipeRemainder().apply(inventory.getStack(i), getId()));
+			} else if (item.hasRecipeRemainder()) {
+				defaultedList.set(i, new ItemStack(item.getRecipeRemainder()));
+			}
 		}
 
-		return origReturn;
+		return defaultedList;
 	}
+
+//	@Inject(method = "getRemainingStacks", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getRecipeRemainder()Lnet/minecraft/item/Item;"),
+//			locals = LocalCapture.CAPTURE_FAILEXCEPTION)
+//	default void cacheSlot(C inv, CallbackInfoReturnable<?> info, DefaultedList<ItemStack> ret,
+//						   int index) {
+//		GrossThreadLocalHack.THREADLOCALS.computeIfAbsent((Recipe<?>)this, x -> new ThreadLocal<>()).set(index);
+//	}
+//
+//	@Redirect(method = "getRemainingStacks", at = @At(value = "NEW", target = "net/minecraft/item/ItemStack"))
+//	default ItemStack getNewRemainder(ItemConvertible origItem, C inv) {
+//		WovenItemSettingsHolder holder = (WovenItemSettingsHolder) origItem;
+//
+//		if (holder.woven$getDynamicRecipeRemainder() != null) {
+//			return holder.woven$getDynamicRecipeRemainder().apply(inv.getStack(
+//					GrossThreadLocalHack.THREADLOCALS.computeIfAbsent(
+//							(Recipe<?>)this, x -> new ThreadLocal<>()).get()), this.getId());
+//		}
+//
+//		return new ItemStack(origItem);
+//	}
 }

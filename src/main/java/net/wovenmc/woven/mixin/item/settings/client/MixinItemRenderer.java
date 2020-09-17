@@ -61,7 +61,7 @@ public abstract class MixinItemRenderer {
 				RenderSystem.disableBlend();
 				Tessellator tessellator = Tessellator.getInstance();
 				BufferBuilder bufferBuilder = tessellator.getBuffer();
-				int length = Math.round(13F - value * 13F);
+				int length = Math.round(value * 13F);
 				int color = component.getColor(stack);
 				this.renderGuiQuad(bufferBuilder, x + 2, y + 13, 13, 2, 0, 0, 0, 255);
 				this.renderGuiQuad(bufferBuilder, x + 2, y + 13, length, 1, color >> 16 & 255, color >> 8 & 255, color & 255, 255);

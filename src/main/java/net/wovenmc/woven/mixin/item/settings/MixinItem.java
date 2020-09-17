@@ -16,6 +16,7 @@
 
 package net.wovenmc.woven.mixin.item.settings;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import net.wovenmc.woven.impl.item.settings.WovenItemSettingsHolder;
@@ -31,13 +32,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 
 @Mixin(Item.class)
 public abstract class MixinItem implements WovenItemSettingsHolder {
 	@Unique
 	private MeterComponent woven$meterComponent;
 	@Unique
-	private Function<ItemStack, Item> woven$dynamicRecipeRemainder;
+	private BiFunction<ItemStack, Identifier, ItemStack> woven$dynamicRecipeRemainder;
 	@Unique
 	private Function<ItemStack, EquipmentSlot> woven$equipmentHandler;
 
@@ -59,7 +61,7 @@ public abstract class MixinItem implements WovenItemSettingsHolder {
 
 	@Nullable
 	@Override
-	public Function<ItemStack, Item> woven$getDynamicRecipeRemainder() {
+	public BiFunction<ItemStack, Identifier, ItemStack> woven$getDynamicRecipeRemainder() {
 		return woven$dynamicRecipeRemainder;
 	}
 

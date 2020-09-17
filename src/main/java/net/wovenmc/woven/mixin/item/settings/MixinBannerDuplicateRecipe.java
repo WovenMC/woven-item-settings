@@ -26,13 +26,20 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.BannerDuplicateRecipe;
+import net.minecraft.recipe.SpecialCraftingRecipe;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 
 @Mixin(BannerDuplicateRecipe.class)
-public abstract class MixinBannerDuplicateRecipe {
+public abstract class MixinBannerDuplicateRecipe extends SpecialCraftingRecipe {
 	private final ThreadLocal<Integer> slot = new ThreadLocal<>();
+
+	public MixinBannerDuplicateRecipe(Identifier id) {
+		super(id);
+	}
 
 	@Inject(method = "getRemainingStacks", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getRecipeRemainder()Lnet/minecraft/item/Item;"),
 			locals = LocalCapture.CAPTURE_FAILEXCEPTION)
@@ -41,14 +48,14 @@ public abstract class MixinBannerDuplicateRecipe {
 		slot.set(index);
 	}
 
-	@Redirect(method = "getRemainingStacks", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getRecipeRemainder()Lnet/minecraft/item/Item;"))
-	private Item getNewRemainder(Item origItem, Item origReturn, CraftingInventory inv) {
+	@Redirect(method = "getRemainingStacks", at = @At(value = "NEW", target = "net/minecraft/item/ItemStack"))
+	private ItemStack getNewRemainder(ItemConvertible origItem, CraftingInventory inv) {
 		WovenItemSettingsHolder holder = (WovenItemSettingsHolder) origItem;
 
 		if (holder.woven$getDynamicRecipeRemainder() != null) {
-			return holder.woven$getDynamicRecipeRemainder().apply(inv.getStack(slot.get()));
+			return holder.woven$getDynamicRecipeRemainder().apply(inv.getStack(slot.get()), this.getId());
 		}
 
-		return origReturn;
+		return new ItemStack(origItem);
 	}
 }

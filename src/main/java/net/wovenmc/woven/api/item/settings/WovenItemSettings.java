@@ -16,6 +16,7 @@
 
 package net.wovenmc.woven.api.item.settings;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
@@ -25,6 +26,7 @@ import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 
 /**
@@ -32,7 +34,7 @@ import net.minecraft.util.Rarity;
  */
 public class WovenItemSettings extends Item.Settings {
 	private MeterComponent meterComponent = null;
-	private Function<ItemStack, Item> dynamicRecipeRemainder = null;
+	private BiFunction<ItemStack, Identifier, ItemStack> dynamicRecipeRemainder = null;
 	private Function<ItemStack, EquipmentSlot> equipmentHandler = null;
 
 	/**
@@ -48,7 +50,7 @@ public class WovenItemSettings extends Item.Settings {
 	 * @param remainder A function for determining the remainder of an item stack when crafting dynamically.
 	 * @return The item settings with the function added.
 	 */
-	public WovenItemSettings dynamicRecipeRemainder(Function<ItemStack, Item> remainder) {
+	public WovenItemSettings dynamicRecipeRemainder(BiFunction<ItemStack, Identifier, ItemStack> remainder) {
 		this.dynamicRecipeRemainder = remainder;
 		return this;
 	}
@@ -124,7 +126,7 @@ public class WovenItemSettings extends Item.Settings {
 	 * @return The set dynamic recipe remainder, or null if none was set.
 	 */
 	@Nullable
-	public Function<ItemStack, Item> getDynamicRecipeRemainder() {
+	public BiFunction<ItemStack, Identifier, ItemStack> getDynamicRecipeRemainder() {
 		return dynamicRecipeRemainder;
 	}
 

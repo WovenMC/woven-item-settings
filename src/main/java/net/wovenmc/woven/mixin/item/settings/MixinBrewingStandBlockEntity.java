@@ -26,10 +26,13 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.block.entity.BrewingStandBlockEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 
 @Mixin(BrewingStandBlockEntity.class)
 public abstract class MixinBrewingStandBlockEntity {
+	private static final Identifier BREWING_ID = new Identifier("brewing");
 	private final ThreadLocal<ItemStack> stack = new ThreadLocal<>();
 
 	@Inject(method = "craft", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getRecipeRemainder()Lnet/minecraft/item/Item;"),
@@ -38,14 +41,14 @@ public abstract class MixinBrewingStandBlockEntity {
 		this.stack.set(stack);
 	}
 
-	@Redirect(method = "craft", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getRecipeRemainder()Lnet/minecraft/item/Item;"))
-	private Item getNewRemainder(Item origItem, Item origReturn) {
+	@Redirect(method = "craft", at = @At(value = "NEW", target = "net/minecraft/item/ItemStack"))
+	private ItemStack getNewRemainder(ItemConvertible origItem) {
 		WovenItemSettingsHolder holder = (WovenItemSettingsHolder) origItem;
 
 		if (holder.woven$getDynamicRecipeRemainder() != null) {
-			return holder.woven$getDynamicRecipeRemainder().apply(stack.get());
+			return holder.woven$getDynamicRecipeRemainder().apply(stack.get(), BREWING_ID);
 		}
 
-		return origReturn;
+		return new ItemStack(origItem);
 	}
 }

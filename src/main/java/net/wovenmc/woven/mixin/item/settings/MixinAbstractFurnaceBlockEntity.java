@@ -16,8 +16,10 @@
 
 package net.wovenmc.woven.mixin.item.settings;
 
+import net.wovenmc.woven.api.item.settings.WovenItemSettings;
 import net.wovenmc.woven.impl.item.settings.WovenItemSettingsHolder;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -26,26 +28,60 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.recipe.Recipe;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.util.registry.Registry;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
 public abstract class MixinAbstractFurnaceBlockEntity {
+	@Shadow
+	protected DefaultedList<ItemStack> inventory;
+	private static final Identifier FUEL_ID = new Identifier("furnace_fuel");
 	private final ThreadLocal<ItemStack> stack = new ThreadLocal<>();
 
 	@Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getRecipeRemainder()Lnet/minecraft/item/Item;"),
 			locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-	private void grabLocalStack(CallbackInfo info, boolean isBurning, boolean isCooking, ItemStack cookingStack) {
+	private void grabLocalStack(CallbackInfo info, boolean isBurning, boolean isCooking, ItemStack cookingStack, Recipe<?> recipe) {
 		stack.set(cookingStack);
 	}
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getRecipeRemainder()Lnet/minecraft/item/Item;"))
-	private Item getNewRemainder(Item origItem, Item origReturn) {
+	private Item hackCustomFuelRemainder(Item origItem) {
+		WovenItemSettingsHolder holder = (WovenItemSettingsHolder) origItem;
+		System.out.println(Registry.ITEM.getId(origItem));
+
+		if (holder.woven$getDynamicRecipeRemainder() != null) {
+			return Items.COAL;
+		}
+
+		return origItem.getRecipeRemainder();
+	}
+
+	@Redirect(method = "tick", at = @At(value = "NEW", target = "net/minecraft/item/ItemStack"))
+	private ItemStack getNewFuelRemainder(ItemConvertible origItem) {
 		WovenItemSettingsHolder holder = (WovenItemSettingsHolder) origItem;
 
 		if (holder.woven$getDynamicRecipeRemainder() != null) {
-			return holder.woven$getDynamicRecipeRemainder().apply(stack.get());
+			return holder.woven$getDynamicRecipeRemainder().apply(stack.get(), FUEL_ID);
 		}
 
-		return origReturn;
+		return new ItemStack(origItem);
+	}
+
+	@Inject(method = "craftRecipe", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;decrement(I)V"),
+			cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION)
+	private void injectSmeltRemainder(Recipe<?> recipe, CallbackInfo info, ItemStack inStack) {
+		WovenItemSettingsHolder woven = (WovenItemSettingsHolder) inStack.getItem();
+		if (woven.woven$getDynamicRecipeRemainder() != null) {
+			ItemStack newStack = woven.woven$getDynamicRecipeRemainder().apply(inStack, recipe.getId());
+			if (!newStack.isEmpty()) {
+				this.inventory.set(0, newStack);
+				info.cancel();
+			}
+		}
 	}
 }
