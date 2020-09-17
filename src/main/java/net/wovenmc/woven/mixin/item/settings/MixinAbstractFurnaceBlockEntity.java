@@ -16,7 +16,6 @@
 
 package net.wovenmc.woven.mixin.item.settings;
 
-import net.wovenmc.woven.api.item.settings.WovenItemSettings;
 import net.wovenmc.woven.impl.item.settings.WovenItemSettingsHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -76,8 +75,10 @@ public abstract class MixinAbstractFurnaceBlockEntity {
 			cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION)
 	private void injectSmeltRemainder(Recipe<?> recipe, CallbackInfo info, ItemStack inStack) {
 		WovenItemSettingsHolder woven = (WovenItemSettingsHolder) inStack.getItem();
+
 		if (woven.woven$getDynamicRecipeRemainder() != null) {
 			ItemStack newStack = woven.woven$getDynamicRecipeRemainder().apply(inStack, recipe.getId());
+
 			if (!newStack.isEmpty()) {
 				this.inventory.set(0, newStack);
 				info.cancel();

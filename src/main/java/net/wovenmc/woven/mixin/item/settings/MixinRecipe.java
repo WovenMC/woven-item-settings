@@ -42,9 +42,10 @@ public interface MixinRecipe<C extends Inventory> {
 	default DefaultedList<ItemStack> getRemainingStacks(C inventory) {
 		DefaultedList<ItemStack> defaultedList = DefaultedList.ofSize(inventory.size(), ItemStack.EMPTY);
 
-		for(int i = 0; i < defaultedList.size(); ++i) {
+		for (int i = 0; i < defaultedList.size(); ++i) {
 			Item item = inventory.getStack(i).getItem();
 			WovenItemSettingsHolder woven = (WovenItemSettingsHolder) item;
+
 			if (woven.woven$getDynamicRecipeRemainder() != null) {
 				defaultedList.set(i, woven.woven$getDynamicRecipeRemainder().apply(inventory.getStack(i), getId()));
 			} else if (item.hasRecipeRemainder()) {
@@ -55,23 +56,24 @@ public interface MixinRecipe<C extends Inventory> {
 		return defaultedList;
 	}
 
-//	@Inject(method = "getRemainingStacks", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getRecipeRemainder()Lnet/minecraft/item/Item;"),
-//			locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-//	default void cacheSlot(C inv, CallbackInfoReturnable<?> info, DefaultedList<ItemStack> ret,
-//						   int index) {
-//		GrossThreadLocalHack.THREADLOCALS.computeIfAbsent((Recipe<?>)this, x -> new ThreadLocal<>()).set(index);
-//	}
-//
-//	@Redirect(method = "getRemainingStacks", at = @At(value = "NEW", target = "net/minecraft/item/ItemStack"))
-//	default ItemStack getNewRemainder(ItemConvertible origItem, C inv) {
-//		WovenItemSettingsHolder holder = (WovenItemSettingsHolder) origItem;
-//
-//		if (holder.woven$getDynamicRecipeRemainder() != null) {
-//			return holder.woven$getDynamicRecipeRemainder().apply(inv.getStack(
-//					GrossThreadLocalHack.THREADLOCALS.computeIfAbsent(
-//							(Recipe<?>)this, x -> new ThreadLocal<>()).get()), this.getId());
-//		}
-//
-//		return new ItemStack(origItem);
-//	}
+	/*
+	@Inject(method = "getRemainingStacks", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getRecipeRemainder()Lnet/minecraft/item/Item;"),
+			locals = LocalCapture.CAPTURE_FAILEXCEPTION)
+	default void cacheSlot(C inv, CallbackInfoReturnable<?> info, DefaultedList<ItemStack> ret,
+			int index) {
+		GrossThreadLocalHack.THREADLOCALS.computeIfAbsent((Recipe<?>)this, x -> new ThreadLocal<>()).set(index);
+	}
+
+	@Redirect(method = "getRemainingStacks", at = @At(value = "NEW", target = "net/minecraft/item/ItemStack"))
+	default ItemStack getNewRemainder(ItemConvertible origItem, C inv) {
+		WovenItemSettingsHolder holder = (WovenItemSettingsHolder) origItem;
+
+		if (holder.woven$getDynamicRecipeRemainder() != null) {
+			return holder.woven$getDynamicRecipeRemainder().apply(inv.getStack(
+					GrossThreadLocalHack.THREADLOCALS.computeIfAbsent(
+							(Recipe<?>)this, x -> new ThreadLocal<>()).get()), this.getId());
+		}
+
+		return new ItemStack(origItem);
+	}*/
 }
