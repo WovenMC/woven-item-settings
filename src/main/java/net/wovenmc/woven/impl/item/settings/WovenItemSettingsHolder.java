@@ -16,13 +16,18 @@
 
 package net.wovenmc.woven.impl.item.settings;
 
-import org.apache.logging.log4j.LogManager;
+import net.wovenmc.woven.api.item.settings.EquipmentHandler;
+import net.wovenmc.woven.api.item.settings.MeterComponent;
+import net.wovenmc.woven.api.item.settings.RecipeRemainderHandler;
+import org.jetbrains.annotations.Nullable;
 
-import net.fabricmc.api.ModInitializer;
+public interface WovenItemSettingsHolder {
+	@Nullable
+	MeterComponent woven$getMeterComponent();
 
-public class TemplateModInitializer implements ModInitializer {
-	@Override
-	public void onInitialize() {
-		LogManager.getLogger("woven_module_template").info("Woven Module Template initialized.");
-	}
+	@Nullable
+	RecipeRemainderHandler woven$getDynamicRecipeRemainder();
+
+	@Nullable
+	EquipmentHandler woven$getEquipmentHandler();
 }

@@ -3,5 +3,16 @@
   "package": "net.wovenmc.woven.mixin.item.settings",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "MixinAbstractFurnaceBlockEntity",
+    "MixinBannerDuplicateRecipe",
+    "MixinBookCloningRecipe",
+    "MixinBrewingStandBlockEntity",
+    "MixinItem",
+    "MixinItem$ItemSettingsAccessor",
+    "MixinMobEntity",
+    "MixinRecipe"
+  ],
+  "client": [
+    "client.MixinItemRenderer"
   ]
 }

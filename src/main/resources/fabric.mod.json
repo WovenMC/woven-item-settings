@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "id": "${namespace}",
-  "name": "Woven Module Template",
+  "id": "woven_item_settings",
+  "name": "Woven Item Settings",
   "version": "${version}",
   "description": "${description}",
   "license": "Apache-2.0",
@@ -16,6 +16,8 @@
   "icon": "assets/woven/icon.png",
   "environment": "*",
   "entrypoints": {
+    "main": [
+    ]
   },
   "mixins": [
     "woven-item-settings.mixins.json"
