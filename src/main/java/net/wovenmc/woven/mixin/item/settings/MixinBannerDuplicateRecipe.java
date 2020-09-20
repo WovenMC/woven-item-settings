@@ -52,7 +52,7 @@ public abstract class MixinBannerDuplicateRecipe extends SpecialCraftingRecipe {
 		WovenItemSettingsHolder holder = (WovenItemSettingsHolder) origItem;
 
 		if (holder.woven$getDynamicRecipeRemainder() != null) {
-			return holder.woven$getDynamicRecipeRemainder().apply(inv.getStack(slot.get()), this.getId());
+			return holder.woven$getDynamicRecipeRemainder().getRemainder(inv.getStack(slot.get()), this.getId());
 		}
 
 		return new ItemStack(origItem);

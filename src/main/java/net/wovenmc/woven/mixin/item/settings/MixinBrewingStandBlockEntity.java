@@ -45,7 +45,7 @@ public abstract class MixinBrewingStandBlockEntity {
 		WovenItemSettingsHolder holder = (WovenItemSettingsHolder) origItem;
 
 		if (holder.woven$getDynamicRecipeRemainder() != null) {
-			return holder.woven$getDynamicRecipeRemainder().apply(stack.get(), BREWING_ID);
+			return holder.woven$getDynamicRecipeRemainder().getRemainder(stack.get(), BREWING_ID);
 		}
 
 		return new ItemStack(origItem);

@@ -35,7 +35,7 @@ public abstract class MixinMobEntity {
 		WovenItemSettingsHolder holder = ((WovenItemSettingsHolder) item);
 
 		if (holder.woven$getEquipmentHandler() != null) {
-			info.setReturnValue(holder.woven$getEquipmentHandler().apply(stack));
+			info.setReturnValue(holder.woven$getEquipmentHandler().getEquipmentSlot(stack));
 		}
 	}
 }

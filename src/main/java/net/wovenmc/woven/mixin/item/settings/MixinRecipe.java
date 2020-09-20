@@ -47,7 +47,7 @@ public interface MixinRecipe<C extends Inventory> {
 			WovenItemSettingsHolder woven = (WovenItemSettingsHolder) item;
 
 			if (woven.woven$getDynamicRecipeRemainder() != null) {
-				defaultedList.set(i, woven.woven$getDynamicRecipeRemainder().apply(inventory.getStack(i), getId()));
+				defaultedList.set(i, woven.woven$getDynamicRecipeRemainder().getRemainder(inventory.getStack(i), getId()));
 			} else if (item.hasRecipeRemainder()) {
 				defaultedList.set(i, new ItemStack(item.getRecipeRemainder()));
 			}
